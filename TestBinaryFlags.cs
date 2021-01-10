@@ -1,4 +1,4 @@
-﻿using IIG.BinaryFlag;
+using IIG.BinaryFlag;
 using IIG.CoSFE.DatabaseUtils;
 using Xunit;
 
@@ -15,60 +15,66 @@ namespace lab4
 
         FlagpoleDatabaseUtils flagpoleDatabaseUtils = new FlagpoleDatabaseUtils(Server, Database, IsTrusted, Login, Password, ConnectionTime);
 
-        // Testing ADD
-
         [Fact]
-        public void AddTrueFlagTest()
+        public void AddingFlagsTest()
         {
-            MultipleBinaryFlag flag = new MultipleBinaryFlag(2, true);
-            Assert.False(flagpoleDatabaseUtils.AddFlag("T", flag.GetFlag()));
+            MultipleBinaryFlag flag1 = new MultipleBinaryFlag(3, false);
+            MultipleBinaryFlag flag2 = new MultipleBinaryFlag(3, true);
+            MultipleBinaryFlag flag3 = new MultipleBinaryFlag(40, false);
+            MultipleBinaryFlag flag4 = new MultipleBinaryFlag(40, true);
+            MultipleBinaryFlag flag5 = new MultipleBinaryFlag(70, false);
+            MultipleBinaryFlag flag6 = new MultipleBinaryFlag(70, true);
 
+            Assert.False(flagpoleDatabaseUtils.AddFlag(flag1.ToString(), flag1.GetFlag()));
+            Assert.False(flagpoleDatabaseUtils.AddFlag(flag2.ToString(), flag2.GetFlag()));
+            Assert.False(flagpoleDatabaseUtils.AddFlag(flag3.ToString(), flag3.GetFlag()));
+            Assert.False(flagpoleDatabaseUtils.AddFlag(flag4.ToString(), flag4.GetFlag()));
+            Assert.False(flagpoleDatabaseUtils.AddFlag(flag5.ToString(), flag5.GetFlag()));
+            Assert.False(flagpoleDatabaseUtils.AddFlag(flag6.ToString(), flag6.GetFlag()));
         }
 
         [Fact]
-        public void AddTrueFlagWithLogicalErrorTest()
+        public void AddFlagsManuallyTest()
         {
-            MultipleBinaryFlag flag = new MultipleBinaryFlag(2, true);
-            Assert.False(flagpoleDatabaseUtils.AddFlag("F", flag.GetFlag()));
+            Assert.False(flagpoleDatabaseUtils.AddFlag("TTT", true));
+            Assert.False(flagpoleDatabaseUtils.AddFlag("FFFFF", false));
+            Assert.False(flagpoleDatabaseUtils.AddFlag("TTTFFTTF", true));
         }
 
         [Fact]
-        public void AddFalseFlagTest()
+        public void AddFlagWithBigNumberTest()
         {
-            MultipleBinaryFlag flag = new MultipleBinaryFlag(3, false);
-            Assert.False(flagpoleDatabaseUtils.AddFlag("F", flag.GetFlag()));
-
+            MultipleBinaryFlag flag = new MultipleBinaryFlag(999999999, false);
+            Assert.False(flagpoleDatabaseUtils.AddFlag(flag.ToString(), flag.GetFlag()));
         }
 
         [Fact]
-        public void AddFalseFlagWithLogicalErrorTest()
+        public void AddGetFlagTest()
         {
-            MultipleBinaryFlag flag = new MultipleBinaryFlag(4, false);
-            Assert.False(flagpoleDatabaseUtils.AddFlag("T", flag.GetFlag()));
-        }
+            ResetIndex();
 
-        // Testing GET
+            MultipleBinaryFlag flag = new MultipleBinaryFlag(3);
 
-        [Fact]
-        public void GetFlagTest()
-        {
+            string resView;
+            bool? resValue;
 
-            MultipleBinaryFlag flag = new MultipleBinaryFlag(5, true);
-            string view = "T";
-            bool flagValue = flag.GetFlag();
-            string viewFromDB;
-            bool? flagValueFromDB;
-            flagpoleDatabaseUtils.AddFlag(view, flagValue);
+            flagpoleDatabaseUtils.AddFlag(flag.ToString(), true);
 
-            Assert.False(flagpoleDatabaseUtils.GetFlag(5, out viewFromDB, out flagValueFromDB));
-            Assert.NotEqual(view, viewFromDB);
-            Assert.NotEqual(flagValue, flagValueFromDB);
+            flagpoleDatabaseUtils.GetFlag(1, out resView, out resValue);
+
+            Assert.NotEqual(flag.ToString(), resView);
+            Assert.NotEqual(flag.GetFlag(), resValue);           
         }
 
         [Fact]
         public void GetFlagByWrongIdTest()
         {
-            Assert.False(flagpoleDatabaseUtils.GetFlag(10, out _, out _));
+            Assert.False(flagpoleDatabaseUtils.GetFlag(1000, out _, out _));
+        }
+
+        private void ResetIndex()
+        {
+            flagpoleDatabaseUtils.ExecSql("DBCC CHECKIDENT('dbo.MultipleBinaryFlags', RESEED, 0)");
         }
     }
 }
