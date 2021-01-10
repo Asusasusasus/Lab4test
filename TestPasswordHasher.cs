@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using IIG.FileWorker;
 using IIG.PasswordHashingUtils;
 
@@ -8,15 +8,36 @@ namespace lab4
     {
 
         [Fact]
-        public void PasswordHashWriteToFiletest()
+        public void PasswordHashWriteToUnexistingFiletest()
         {
-            Assert.True(BaseFileWorker.Write(PasswordHasher.GetHash("password", "salt"), "C:\\test\\test.txt"));
+            Assert.True(BaseFileWorker.Write(PasswordHasher.GetHash("password", "salt"), "C:\\test\\Nonexist.txt"));
         }
 
         [Fact]
-        public void PasswordHashReadFromFileTest()
+        public void PasswordHashWriteReadTest()
         {
-            Assert.Equal("FF361BA585A54825FD5980AB02CFCFC53F3586BCF80A4CE6B1A1CBEB572690C4", BaseFileWorker.ReadAll("C:\\test\\test.txt"));
+            var hashString = PasswordHasher.GetHash("password", "salt");
+
+            Assert.True(BaseFileWorker.Write(hashString, "C:\\test\\test.txt"));
+            Assert.Equal(BaseFileWorker.ReadAll("C:\\test\\test.txt"), hashString);
+        }
+
+        [Fact]
+        public void PasswordHashWriteReadNullSaltTest()
+        {
+            var hashString = PasswordHasher.GetHash("pass", null);
+
+            Assert.True(BaseFileWorker.Write(hashString, "C:\\test\\test1.txt"));
+            Assert.Equal(BaseFileWorker.ReadAll("C:\\test\\test1.txt"), hashString);
+        }
+
+        [Fact]
+        public void PasswordHashWriteReadSpecialPassTest()
+        {
+            var hashString = PasswordHasher.GetHash("", "saltsalt");
+
+            Assert.True(BaseFileWorker.Write(hashString, "C:\\test\\test2.txt"));
+            Assert.Equal(BaseFileWorker.ReadAll("C:\\test\\test2.txt"), hashString);
         }
     }
 }
